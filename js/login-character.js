@@ -77,19 +77,34 @@
           tryExtractInputs(5);
 
           /* Fix 0x0 size issue: canvas is hidden on page load due to lamp scene.
-             Use ResizeObserver to trigger Rive resize when it becomes visible. */
-          if (window.ResizeObserver) {
-            var ro = new ResizeObserver(function() {
-              if (canvas.clientWidth > 0 && canvas.clientHeight > 0) {
+             We need to wait for the container to have actual dimensions. */
+          var resizeInterval;
+          var checkAndResize = function() {
+            var w = canvas.clientWidth;
+            var h = canvas.clientHeight;
+            if (w > 0 && h > 0) {
+              /* Ensure the canvas attributes match the client dimensions */
+              var dpr = window.devicePixelRatio || 1;
+              canvas.width = w * dpr;
+              canvas.height = h * dpr;
+              if (riveInstance && typeof riveInstance.resizeDrawingSurfaceToCanvas === 'function') {
                 riveInstance.resizeDrawingSurfaceToCanvas();
               }
-            });
-            ro.observe(loginLogo);
-          } else {
-            /* Fallback for older browsers */
-            riveInstance.resizeDrawingSurfaceToCanvas();
-            setTimeout(function() { riveInstance.resizeDrawingSurfaceToCanvas(); }, 1500);
+              if (resizeInterval) clearInterval(resizeInterval);
+              return true;
+            }
+            return false;
+          };
+
+          if (!checkAndResize()) {
+            /* If not visible yet, poll until it is */
+            resizeInterval = setInterval(checkAndResize, 100);
           }
+          
+          /* Also listen to window resize to maintain crispness */
+          window.addEventListener('resize', function() {
+            checkAndResize();
+          });
         },
         onLoadError: function (err) {
           console.warn('[LoginCharacter] .riv load error:', err);
