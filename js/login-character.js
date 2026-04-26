@@ -77,18 +77,24 @@
           tryExtractInputs(5);
 
           /* Fix 0x0 size issue: canvas is hidden on page load due to lamp scene.
-             We need to wait for the container to have actual dimensions. */
+             We need to wait for the container to have actual dimensions. 
+             Also wait for bounding box to be > 0 (CSS scale(0) animation makes it 0 initially). */
           var resizeInterval;
           var checkAndResize = function() {
-            var w = canvas.clientWidth;
-            var h = canvas.clientHeight;
-            if (w > 0 && h > 0) {
+            var rect = canvas.getBoundingClientRect();
+            if (rect.width > 0 && rect.height > 0 && canvas.clientWidth > 0) {
               /* Ensure the canvas attributes match the client dimensions */
               var dpr = window.devicePixelRatio || 1;
-              canvas.width = w * dpr;
-              canvas.height = h * dpr;
+              canvas.width = canvas.clientWidth * dpr;
+              canvas.height = canvas.clientHeight * dpr;
               if (riveInstance && typeof riveInstance.resizeDrawingSurfaceToCanvas === 'function') {
                 riveInstance.resizeDrawingSurfaceToCanvas();
+                /* Final safety resize after entrance animation completes */
+                setTimeout(function() {
+                  if (riveInstance && typeof riveInstance.resizeDrawingSurfaceToCanvas === 'function') {
+                    riveInstance.resizeDrawingSurfaceToCanvas();
+                  }
+                }, 1000);
               }
               if (resizeInterval) clearInterval(resizeInterval);
               return true;
@@ -97,7 +103,7 @@
           };
 
           if (!checkAndResize()) {
-            /* If not visible yet, poll until it is */
+            /* If not visible/animating yet, poll until it is */
             resizeInterval = setInterval(checkAndResize, 100);
           }
           
