@@ -1,11 +1,79 @@
-# Editor / OS
+# ─────────────────────────────────────────────
+# OS / System Files
+# ─────────────────────────────────────────────
 .DS_Store
+.DS_Store?
+._*
 Thumbs.db
-.vscode/
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
 
-# Backend — this directory is deployed separately to Render
-# (included here so the frontend repo is clean)
+# ─────────────────────────────────────────────
+# Editors & IDEs
+# ─────────────────────────────────────────────
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.sublime-workspace
+*.sublime-project
+
+# ─────────────────────────────────────────────
+# Node.js / npm
+# ─────────────────────────────────────────────
+node_modules/
 backend/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.npm
+.yarn/
+
+# ─────────────────────────────────────────────
+# Environment & Secrets  ← NEVER commit these
+# ─────────────────────────────────────────────
+.env
+.env.local
+.env.development
+.env.production
+.env.test
 backend/.env
+backend/.env.*
+!backend/.env.example
+
+# ─────────────────────────────────────────────
+# Runtime Data (file-based "database")
+# Wiped on each Render redeploy anyway
+# ─────────────────────────────────────────────
 backend/users.json
 backend/trips.json
+
+# ─────────────────────────────────────────────
+# Logs
+# ─────────────────────────────────────────────
+logs/
+*.log
+backend/logs/
+
+# ─────────────────────────────────────────────
+# Build / Cache Artefacts
+# ─────────────────────────────────────────────
+dist/
+build/
+.cache/
+.parcel-cache/
+.vercel/
+.next/
+out/
+
+# ─────────────────────────────────────────────
+# Misc
+# ─────────────────────────────────────────────
+*.zip
+*.tar.gz
+coverage/
