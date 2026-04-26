@@ -923,6 +923,7 @@ textarea.form-input {
     top: 0;
     right: 0;
     height: 100vh;
+    height: 100dvh;
     width: 85%;
     max-width: 320px;
     background: rgba(10, 12, 20, 0.98);
@@ -930,7 +931,7 @@ textarea.form-input {
     flex-direction: column;
     justify-content: flex-start;
     align-items: stretch;
-    padding: calc(var(--navbar-height) + 40px) 20px 40px;
+    padding: calc(var(--navbar-height) + 40px) 20px 100px;
     transform: translateX(100%);
     opacity: 1;
     visibility: visible;
@@ -991,8 +992,8 @@ textarea.form-input {
   }
 
   .nav-links a.nav-cta {
-    margin-top: auto;
-    margin-bottom: 0;
+    margin-top: 16px;
+    margin-bottom: 12px;
     padding: 16px 20px !important;
     text-align: center;
     border-radius: var(--radius-full) !important;
@@ -1063,3 +1064,24 @@ textarea.form-input {
 .mt-section { margin-top: var(--section-padding); }
 .mb-section { margin-bottom: var(--section-padding); }
 .pt-nav { padding-top: var(--navbar-height); }
+
+/* ══════════════════════
+   CURSOR TRAIL
+   ══════════════════════ */
+.cursor-trail-dot {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  pointer-events: none;
+  /* Will-change helps with GPU optimization */
+  will-change: transform, opacity;
+  /* Shift top/left so transform is centered on cursor */
+  margin-left: -6px;
+  margin-top: -6px;
+  z-index: 9999;
+}
+
+[data-theme="dark"] .cursor-trail-dot {
+  box-shadow: 0 0 8px currentColor;
+}

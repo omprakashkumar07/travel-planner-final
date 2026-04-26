@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Rive Test</title>
+  <style>
+    body { background: #333; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+    canvas { width: 300px; height: 300px; background: #fff; }
+  </style>
+</head>
+<body>
+  <canvas id="rive-canvas"></canvas>
+  <script src="https://unpkg.com/@rive-app/canvas@2.21.6"></script>
+  <script>
+    const canvas = document.getElementById('rive-canvas');
+    try {
+      const r = new rive.Rive({
+        src: 'images/login-character.riv',
+        canvas: canvas,
+        autoplay: true,
+        stateMachines: 'Login Machine',
+        onLoad: () => {
+          console.log('Rive loaded!', r.stateMachineNames, r.stateMachineInputs('Login Machine'));
+          r.resizeDrawingSurfaceToCanvas();
+        },
+        onLoadError: (e) => {
+          console.error('Rive load error', e);
+        }
+      });
+    } catch(e) {
+      console.error(e);
+    }
+  </script>
+</body>
+</html>

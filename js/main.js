@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initScrollReveal();
   initActiveNav();
   updateAuthNav();
+  initCursorTrail();
 });
 
 /* ── Route Protection ── */
@@ -237,3 +238,93 @@ document.addEventListener('DOMContentLoaded', () => {
   const statsSection = document.querySelector('.stats-row');
   if (statsSection) statsObserver.observe(statsSection);
 });
+
+/* ── Cursor Trail Effect ── */
+function initCursorTrail() {
+  // Mobile Safety & Reduced Motion Check
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (window.innerWidth < 768 || prefersReducedMotion) return;
+
+  const colors = [
+    '#635bff', // accent-coral (blurple)
+    '#00d4ff', // accent-teal
+    '#8b5cf6', // accent-purple
+    '#ffb020', // accent-amber
+    '#d946ef'  // pink
+  ];
+
+  const poolSize = 50; // Max dots to prevent DOM bloat
+  const dotPool = [];
+  let poolIndex = 0;
+
+  // Pre-create DOM elements (Object Pooling)
+  const container = document.createElement('div');
+  container.id = 'cursor-trail-container';
+  container.style.position = 'fixed';
+  container.style.top = '0';
+  container.style.left = '0';
+  container.style.width = '100%';
+  container.style.height = '100%';
+  container.style.pointerEvents = 'none';
+  container.style.zIndex = '9999';
+  container.style.overflow = 'hidden';
+  document.body.appendChild(container);
+
+  for (let i = 0; i < poolSize; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'cursor-trail-dot';
+    // Start hidden offscreen
+    dot.style.transform = 'translate(-100px, -100px) scale(0)';
+    dot.style.opacity = '0';
+    container.appendChild(dot);
+    dotPool.push(dot);
+  }
+
+  let lastDrawTime = 0;
+  const drawInterval = 1000 / 60; // Max 60 dots/sec (~16.6ms)
+
+  // Toggle state
+  window.cursorTrailEnabled = true;
+
+  window.toggleCursorTrail = () => {
+    window.cursorTrailEnabled = !window.cursorTrailEnabled;
+    if (!window.cursorTrailEnabled) {
+      dotPool.forEach(dot => {
+        dot.style.opacity = '0';
+      });
+    }
+  };
+
+  const drawDot = (x, y) => {
+    if (!window.cursorTrailEnabled) return;
+    
+    const dot = dotPool[poolIndex];
+    poolIndex = (poolIndex + 1) % poolSize;
+
+    // Reset transition briefly to move dot immediately
+    dot.style.transition = 'none';
+    dot.style.transform = `translate(${x}px, ${y}px) scale(1)`;
+    dot.style.opacity = '1';
+    
+    // Pick random color
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    dot.style.backgroundColor = color;
+    
+    // Trigger reflow
+    void dot.offsetWidth;
+    
+    // Add transition for fading/shrinking
+    dot.style.transition = 'transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.6s ease-out';
+    dot.style.transform = `translate(${x}px, ${y}px) scale(0)`;
+    dot.style.opacity = '0';
+  };
+
+  // Throttle mousemove
+  document.addEventListener('mousemove', (e) => {
+    const now = performance.now();
+    if (now - lastDrawTime >= drawInterval) {
+      drawDot(e.clientX, e.clientY);
+      lastDrawTime = now;
+    }
+  }, { passive: true });
+}
