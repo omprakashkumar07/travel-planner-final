@@ -7,21 +7,11 @@
 
   /* ── Configuration ── */
   var RIV_PATH = '../images/login-character.riv';
-  var STATE_MACHINE = 'Login Machine';
-  var CANVAS_SIZE = { w: 300, h: 300 };
-
-  /* ── State Machine Input Names ── */
-  var INPUT_NAMES = {
-    isChecking: 'isChecking',
-    isHandsUp:  'isHandsUp',
-    numLook:    'numLook',
-    trigSuccess:'trigSuccess',
-    trigFail:   'trigFail'
-  };
 
   /* ── DOM refs (set on init) ── */
   var riveInstance = null;
   var inputs = {};
+  var stateMachineName = null;
 
   /* ═══════════════════════════════════════
      1. SETUP — create canvas, init Rive
@@ -37,18 +27,19 @@
       return;
     }
 
-    /* Find auth-logo containers and replace with canvas */
+    /* Find auth-logo container */
     var loginLogo = loginCard.querySelector('.auth-logo');
-    var signupCard = document.querySelector('.auth-card-signup');
-    var signupLogo = signupCard ? signupCard.querySelector('.auth-logo') : null;
-
     if (!loginLogo) return;
 
-    /* Create canvas element */
+    /* Create canvas element — use higher DPR for crisp rendering */
+    var dpr = window.devicePixelRatio || 1;
+    var displaySize = 200; /* CSS pixels for the canvas area */
     var canvas = document.createElement('canvas');
     canvas.id = 'login-character-canvas';
-    canvas.width = CANVAS_SIZE.w;
-    canvas.height = CANVAS_SIZE.h;
+    canvas.width = displaySize * dpr;
+    canvas.height = displaySize * dpr;
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
     canvas.setAttribute('aria-label', 'Animated login character');
 
     /* Replace emoji logo with canvas container */
@@ -56,29 +47,63 @@
     loginLogo.className = 'auth-logo auth-logo-character';
     loginLogo.appendChild(canvas);
 
-    /* Hide signup logo emoji — character is only on login side */
-    /* (signup uses a different icon) */
+    /* Store ref for fallback */
+    var logoRef = loginLogo;
 
-    /* Initialize Rive */
+    /* Initialize Rive — don't pre-specify state machine (name varies per file) */
     try {
       riveInstance = new rive.Rive({
         src: RIV_PATH,
         canvas: canvas,
         autoplay: true,
-        stateMachines: STATE_MACHINE,
         onLoad: function () {
           riveInstance.resizeDrawingSurfaceToCanvas();
-          extractInputs();
+
+          /* Auto-detect state machine name */
+          var smNames = [];
+          try { smNames = riveInstance.stateMachineNames || []; } catch(e) {}
+          
+          if (smNames.length === 0) {
+            /* Try common state machine names */
+            var tryNames = ['Login Machine', 'State Machine 1', 'LoginMachine'];
+            for (var i = 0; i < tryNames.length; i++) {
+              try {
+                var testInputs = riveInstance.stateMachineInputs(tryNames[i]);
+                if (testInputs && testInputs.length > 0) {
+                  stateMachineName = tryNames[i];
+                  break;
+                }
+              } catch(e) {}
+            }
+          } else {
+            stateMachineName = smNames[0];
+          }
+
+          /* Play state machine if found */
+          if (stateMachineName) {
+            try { riveInstance.play(stateMachineName); } catch(e) {}
+            extractInputs();
+          } else {
+            /* Fallback: play first animation */
+            try {
+              var animNames = riveInstance.animationNames || [];
+              if (animNames.length > 0) riveInstance.play(animNames[0]);
+            } catch(e) {}
+            console.info('[LoginCharacter] No state machine found — playing default');
+          }
+
           wireFormEvents();
+          console.info('[LoginCharacter] Loaded. SM:', stateMachineName,
+            '| Inputs:', Object.keys(inputs).join(', '));
         },
         onLoadError: function (err) {
           console.warn('[LoginCharacter] Failed to load .riv:', err);
-          restoreFallback(loginLogo);
+          restoreFallback(logoRef);
         }
       });
     } catch (err) {
       console.warn('[LoginCharacter] Rive init error:', err);
-      restoreFallback(loginLogo);
+      restoreFallback(logoRef);
     }
   }
 
@@ -86,19 +111,23 @@
      2. EXTRACT STATE MACHINE INPUTS
   ═══════════════════════════════════════ */
   function extractInputs() {
-    if (!riveInstance) return;
-    var smInputs = riveInstance.stateMachineInputs(STATE_MACHINE);
-    if (!smInputs) {
-      console.warn('[LoginCharacter] No state machine inputs found');
+    if (!riveInstance || !stateMachineName) return;
+    var smInputs;
+    try {
+      smInputs = riveInstance.stateMachineInputs(stateMachineName);
+    } catch(e) {
       return;
     }
+    if (!smInputs) return;
 
     smInputs.forEach(function (inp) {
-      if (inp.name === INPUT_NAMES.isChecking) inputs.isChecking = inp;
-      if (inp.name === INPUT_NAMES.isHandsUp)  inputs.isHandsUp  = inp;
-      if (inp.name === INPUT_NAMES.numLook)    inputs.numLook    = inp;
-      if (inp.name === INPUT_NAMES.trigSuccess) inputs.trigSuccess = inp;
-      if (inp.name === INPUT_NAMES.trigFail)    inputs.trigFail    = inp;
+      /* Map known input names (case-insensitive match) */
+      var name = (inp.name || '').toLowerCase();
+      if (name === 'ischecking' || name === 'is_checking') inputs.isChecking = inp;
+      if (name === 'ishandsup' || name === 'is_hands_up') inputs.isHandsUp = inp;
+      if (name === 'numlook' || name === 'num_look' || name === 'look') inputs.numLook = inp;
+      if (name === 'trigsuccess' || name === 'trig_success' || name === 'success') inputs.trigSuccess = inp;
+      if (name === 'trigfail' || name === 'trig_fail' || name === 'fail') inputs.trigFail = inp;
     });
   }
 
@@ -180,7 +209,6 @@
     var len = (field.value || '').length;
     var maxLen = 30;
     var normalized = Math.min(len / maxLen, 1);
-    /* Center the look: 0 = far left, 50 = center, 100 = far right */
     inputs.numLook.value = normalized * 100;
   }
 
@@ -199,7 +227,6 @@
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
-    /* DOM already loaded (scripts at bottom of body) */
     init();
   }
 
