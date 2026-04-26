@@ -50,54 +50,35 @@
     /* Store ref for fallback */
     var logoRef = loginLogo;
 
-    /* Initialize Rive — don't pre-specify state machine (name varies per file) */
+    /* Initialize Rive with the confirmed state machine name */
+    var SM_NAME = 'Login Machine';
     try {
       riveInstance = new rive.Rive({
         src: RIV_PATH,
         canvas: canvas,
         autoplay: true,
+        stateMachines: SM_NAME,
+        fit: rive.Fit.Cover,
+        alignment: rive.Alignment.Center,
         onLoad: function () {
           riveInstance.resizeDrawingSurfaceToCanvas();
+          stateMachineName = SM_NAME;
 
-          /* Auto-detect state machine name */
-          var smNames = [];
-          try { smNames = riveInstance.stateMachineNames || []; } catch(e) {}
-          
-          if (smNames.length === 0) {
-            /* Try common state machine names */
-            var tryNames = ['Login Machine', 'State Machine 1', 'LoginMachine'];
-            for (var i = 0; i < tryNames.length; i++) {
-              try {
-                var testInputs = riveInstance.stateMachineInputs(tryNames[i]);
-                if (testInputs && testInputs.length > 0) {
-                  stateMachineName = tryNames[i];
-                  break;
-                }
-              } catch(e) {}
-            }
-          } else {
-            stateMachineName = smNames[0];
-          }
-
-          /* Play state machine if found */
-          if (stateMachineName) {
-            try { riveInstance.play(stateMachineName); } catch(e) {}
+          /* Extract inputs — retry if SM hasn't fully initialized yet */
+          function tryExtractInputs(attempts) {
             extractInputs();
-          } else {
-            /* Fallback: play first animation */
-            try {
-              var animNames = riveInstance.animationNames || [];
-              if (animNames.length > 0) riveInstance.play(animNames[0]);
-            } catch(e) {}
-            console.info('[LoginCharacter] No state machine found — playing default');
+            if (Object.keys(inputs).length === 0 && attempts > 0) {
+              setTimeout(function() { tryExtractInputs(attempts - 1); }, 100);
+            } else {
+              wireFormEvents();
+              console.info('[LoginCharacter] Ready. SM:', stateMachineName,
+                '| Inputs:', Object.keys(inputs).join(', '));
+            }
           }
-
-          wireFormEvents();
-          console.info('[LoginCharacter] Loaded. SM:', stateMachineName,
-            '| Inputs:', Object.keys(inputs).join(', '));
+          tryExtractInputs(5);
         },
         onLoadError: function (err) {
-          console.warn('[LoginCharacter] Failed to load .riv:', err);
+          console.warn('[LoginCharacter] .riv load error:', err);
           restoreFallback(logoRef);
         }
       });
