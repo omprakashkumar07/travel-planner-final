@@ -900,6 +900,7 @@ textarea.form-input {
     opacity: 0;
     visibility: hidden;
     transition: all var(--transition-normal);
+    z-index: 999;
   }
 
   .nav-links.open {

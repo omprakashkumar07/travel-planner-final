@@ -627,6 +627,78 @@
 }
 
 /* ── Responsive ── */
+
+/* ── Mobile Auth Fix: Backdrop overlay + solid card ── */
+@media (max-width: 768px) {
+  /* Full-screen dark backdrop behind auth page */
+  .auth-page::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  /* Solid opaque card — no transparency bleed-through */
+  .auth-card {
+    background: rgba(20, 20, 20, 0.95) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    color: #fff;
+  }
+
+  /* Ensure auth page overlays everything */
+  .auth-page {
+    position: relative;
+    z-index: 10;
+  }
+
+  /* Auth container stays above backdrop */
+  .auth-container {
+    z-index: 11;
+  }
+
+  /* Dim the background mesh on mobile */
+  .auth-bg-mesh {
+    opacity: 0.3;
+  }
+
+  /* Reduce floating icons distraction on mobile */
+  .floating-icons {
+    opacity: 0.15;
+  }
+
+  /* Prevent body scroll when auth page is open */
+  body:has(.auth-page) {
+    overflow: hidden;
+  }
+
+  /* High-contrast text in card */
+  .auth-card .auth-header h2 {
+    color: #ffffff;
+  }
+  .auth-card .auth-header p {
+    color: rgba(255, 255, 255, 0.7);
+  }
+  .auth-card .auth-field input {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+  }
+  .auth-card .auth-field input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+  }
+  .auth-card .auth-switch {
+    color: rgba(255, 255, 255, 0.7);
+  }
+  .auth-card .remember-me {
+    color: rgba(255, 255, 255, 0.7);
+  }
+}
+
 @media (max-width: 580px) {
   .auth-card {
     padding: 36px 24px;
@@ -657,5 +729,24 @@
   .auth-card-signup .auth-submit,
   .auth-card-signup .auth-switch {
     grid-column: 1 / -1;
+  }
+}
+
+/* ── Very small screens: near-fully opaque ── */
+@media (max-width: 480px) {
+  .auth-page::before {
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .auth-card {
+    background: rgba(10, 10, 10, 0.98) !important;
+    border-radius: var(--radius-md) !important;
+    margin: 0 8px;
+  }
+
+  .auth-bg-mesh {
+    opacity: 0.15;
   }
 }
