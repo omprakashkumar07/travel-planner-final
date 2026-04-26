@@ -256,6 +256,21 @@ input, textarea, button, select {
   gap: 8px;
 }
 
+.theme-toggle-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 8px;
+  margin-left: 8px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.theme-toggle-label {
+  display: none;
+}
+
 .nav-links a {
   padding: 8px 16px;
   border-radius: var(--radius-full);
@@ -953,6 +968,26 @@ textarea.form-input {
 
   .nav-links a.active::after {
     display: none;
+  }
+
+  /* Theme Toggle in Mobile Menu */
+  .theme-toggle-btn {
+    order: -1; /* Force to top of flex container */
+    width: 100%;
+    justify-content: space-between;
+    padding: 15px 20px;
+    margin-left: 0;
+    margin-bottom: 20px;
+    font-size: 1.15rem;
+    color: rgba(255, 255, 255, 0.8);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 0;
+  }
+  
+  .theme-toggle-label {
+    display: block;
+    font-family: var(--font-heading);
+    font-weight: 500;
   }
 
   .nav-links a.nav-cta {

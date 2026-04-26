@@ -35,17 +35,23 @@ function initThemeSystem() {
   if (navLinks) {
     const themeBtn = document.createElement('button');
     themeBtn.className = 'theme-toggle-btn';
-    themeBtn.innerHTML = savedTheme === 'dark' ? '☀️' : '🌙';
-    themeBtn.style.cssText = 'background:transparent; border:none; font-size:1.2rem; cursor:pointer; padding:8px; margin-left:8px; transition:transform 0.3s ease;';
+    themeBtn.innerHTML = `
+      <span class="theme-toggle-label">Theme</span>
+      <span class="theme-toggle-icon">${savedTheme === 'dark' ? '☀️' : '🌙'}</span>
+    `;
     
     themeBtn.addEventListener('click', () => {
       const currentTheme = document.documentElement.getAttribute('data-theme');
       const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
       document.documentElement.setAttribute('data-theme', newTheme);
       localStorage.setItem('theme', newTheme);
-      themeBtn.innerHTML = newTheme === 'dark' ? '☀️' : '🌙';
-      themeBtn.style.transform = 'scale(1.2)';
-      setTimeout(() => themeBtn.style.transform = 'scale(1)', 150);
+      themeBtn.querySelector('.theme-toggle-icon').textContent = newTheme === 'dark' ? '☀️' : '🌙';
+      
+      const icon = themeBtn.querySelector('.theme-toggle-icon');
+      icon.style.transform = 'scale(1.2)';
+      icon.style.display = 'inline-block';
+      icon.style.transition = 'transform 0.3s ease';
+      setTimeout(() => icon.style.transform = 'scale(1)', 150);
     });
 
     navLinks.appendChild(themeBtn);
