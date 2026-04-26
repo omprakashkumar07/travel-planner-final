@@ -22,7 +22,7 @@
  *    Example: 'https://travel-planner-api.onrender.com'
  *    Leave empty ('') until you have the Render URL.
  */
-const RENDER_BACKEND_URL = '';   // ← PASTE RENDER URL HERE AFTER DEPLOY
+const RENDER_BACKEND_URL = 'https://travel-planner-final.onrender.com';   // ← Render backend
 
 /**
  * API_BASE_URL — auto-detects environment.
