@@ -125,8 +125,10 @@ function initLoginForm() {
         // Store JWT token for authenticated API calls
         localStorage.setItem('tp_token', data.token);
         localStorage.setItem('tp_user', JSON.stringify(data.user));
+        if (window._loginCharacter) window._loginCharacter.trigSuccess();
         handleSuccess(form, `Welcome back, ${data.user.name}!`);
       } else {
+        if (window._loginCharacter) window._loginCharacter.trigFail();
         shakeForm(form);
         showToast(data.error || 'Login failed', 'error');
         btn.textContent = originalText;
@@ -134,6 +136,7 @@ function initLoginForm() {
       }
     } catch (error) {
       console.error('Login error:', error);
+      if (window._loginCharacter) window._loginCharacter.trigFail();
       shakeForm(form);
       showToast('Cannot connect to server', 'error');
       btn.textContent = originalText;
@@ -191,8 +194,10 @@ function initSignupForm() {
         // Store JWT token for authenticated API calls
         localStorage.setItem('tp_token', data.token);
         localStorage.setItem('tp_user', JSON.stringify(data.user));
+        if (window._loginCharacter) window._loginCharacter.trigSuccess();
         handleSuccess(form, `Welcome aboard, ${name}!`);
       } else {
+        if (window._loginCharacter) window._loginCharacter.trigFail();
         shakeForm(form);
         showToast(data.error || 'Signup failed', 'error');
         btn.textContent = originalText;
