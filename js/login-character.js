@@ -58,7 +58,7 @@
         canvas: canvas,
         autoplay: true,
         stateMachines: SM_NAME,
-        fit: rive.Fit.Cover,
+        fit: rive.Fit.Contain,
         alignment: rive.Alignment.Center,
         onLoad: function () {
           riveInstance.resizeDrawingSurfaceToCanvas();
