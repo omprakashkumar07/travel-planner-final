@@ -18,13 +18,14 @@ const PORT = process.env.PORT || 5000;
 // CORS — only allow requests from the configured frontend origin.
 // In production this is set to the Netlify URL via the FRONTEND_URL env var.
 const allowedOrigins = [
-  process.env.FRONTEND_URL,          // e.g. https://travel-planner.vercel.app
-  'http://localhost:5000',           // local (same port)
+  process.env.FRONTEND_URL,                              // set in Render env vars
+  'https://travel-planner-final-nu.vercel.app',         // Vercel production
+  'http://localhost:5000',
   'http://127.0.0.1:5000',
   'http://localhost:3000',
   'http://127.0.0.1:5500',
   'http://localhost:5500',
-  'null',                            // file:// origin (opening HTML directly)
+  'null',
 ].filter(Boolean);
 
 app.use(cors({
