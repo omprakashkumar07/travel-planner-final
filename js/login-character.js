@@ -61,7 +61,6 @@
         fit: rive.Fit.Contain,
         alignment: rive.Alignment.Center,
         onLoad: function () {
-          riveInstance.resizeDrawingSurfaceToCanvas();
           stateMachineName = SM_NAME;
 
           /* Extract inputs — retry if SM hasn't fully initialized yet */
@@ -76,6 +75,21 @@
             }
           }
           tryExtractInputs(5);
+
+          /* Fix 0x0 size issue: canvas is hidden on page load due to lamp scene.
+             Use ResizeObserver to trigger Rive resize when it becomes visible. */
+          if (window.ResizeObserver) {
+            var ro = new ResizeObserver(function() {
+              if (canvas.clientWidth > 0 && canvas.clientHeight > 0) {
+                riveInstance.resizeDrawingSurfaceToCanvas();
+              }
+            });
+            ro.observe(loginLogo);
+          } else {
+            /* Fallback for older browsers */
+            riveInstance.resizeDrawingSurfaceToCanvas();
+            setTimeout(function() { riveInstance.resizeDrawingSurfaceToCanvas(); }, 1500);
+          }
         },
         onLoadError: function (err) {
           console.warn('[LoginCharacter] .riv load error:', err);
