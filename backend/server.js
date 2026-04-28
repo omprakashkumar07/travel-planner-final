@@ -325,6 +325,86 @@ app.post('/chat', async (req, res) => {
 });
 
 // ----------------------------------------
+// DESTINATION SUGGESTIONS API
+// ----------------------------------------
+
+app.post('/api/suggest-destinations', async (req, res) => {
+  try {
+    const { interest, budget, days } = req.body;
+
+    if (!interest || !budget) {
+      return res.status(400).json({ error: 'Interest and budget are required.' });
+    }
+
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(500).json({ error: 'GEMINI_API_KEY is not configured on the server.' });
+    }
+
+    const durationText = days ? `Duration: ${days} days` : 'Duration: Flexible';
+    
+    const prompt = `Suggest 3 travel destinations in India based on the following:
+Interest: ${interest}
+Budget: ${budget}
+${durationText}
+
+For each destination, provide:
+- Name
+- Short description
+- Estimated cost
+- Reason why it fits the interest
+
+Return in JSON format as an array of objects:
+[
+  {
+    "name": "",
+    "description": "",
+    "cost": "",
+    "reason": ""
+  }
+]`;
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: prompt,
+      config: {
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: Type.ARRAY,
+          description: 'Array of 3 suggested destinations',
+          items: {
+            type: Type.OBJECT,
+            properties: {
+              name: { type: Type.STRING, description: 'Destination name' },
+              description: { type: Type.STRING, description: 'Short description' },
+              cost: { type: Type.STRING, description: 'Estimated cost' },
+              reason: { type: Type.STRING, description: 'Reason why it fits the interest' }
+            },
+            required: ['name', 'description', 'cost', 'reason']
+          }
+        }
+      }
+    });
+
+    let jsonOutput;
+    try {
+      jsonOutput = JSON.parse(response.text);
+    } catch (parseError) {
+      console.error('Failed to parse Gemini response as JSON:', parseError);
+      return res.status(500).json({ error: 'AI returned malformed data.' });
+    }
+
+    return res.status(200).json(jsonOutput);
+
+  } catch (error) {
+    console.error('Error in /api/suggest-destinations endpoint:', error);
+    return res.status(500).json({
+      error: 'Failed to find destinations. Please try again later.',
+      details: error.message
+    });
+  }
+});
+
+// ----------------------------------------
 // SAVE TRIP APIs
 // ----------------------------------------
 

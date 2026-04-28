@@ -43,9 +43,54 @@
     </div>
   </section>
 
-  <!-- Search & Grid -->
+  <!-- AI Destination Finder & Grid -->
   <section class="dest-section">
     <div class="container">
+      
+      <!-- AI Suggestion Panel -->
+      <div class="ai-suggest-panel reveal">
+        <div class="ai-suggest-header">
+          <h2>✨ AI Destination Finder</h2>
+          <p>Tell us what you like and your budget, and we'll find the perfect spots.</p>
+        </div>
+        <form id="ai-suggest-form" class="ai-suggest-form">
+          <div class="form-group">
+            <label for="suggest-interest">What type of place do you prefer?</label>
+            <select id="suggest-interest" required>
+              <option value="" disabled selected>Select an interest...</option>
+              <option value="Beach">Beach</option>
+              <option value="Mountains">Mountains</option>
+              <option value="Historical">Historical</option>
+              <option value="Adventure">Adventure</option>
+              <option value="Religious">Religious</option>
+              <option value="Nature">Nature</option>
+              <option value="City / Urban">City / Urban</option>
+              <option value="Wildlife">Wildlife</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="suggest-budget">Budget (₹)</label>
+            <input type="number" id="suggest-budget" placeholder="Enter your budget" required min="1000">
+          </div>
+          <div class="form-group">
+            <label for="suggest-days">Duration (Days)</label>
+            <input type="number" id="suggest-days" placeholder="Optional" min="1">
+          </div>
+          <button type="submit" class="btn-primary ai-suggest-btn">Find Destinations</button>
+        </form>
+        
+        <!-- Loading State -->
+        <div id="ai-suggest-loading" class="ai-suggest-loading hidden">
+          <div class="spinner"></div>
+          <p>Finding best destinations...</p>
+        </div>
+        
+        <!-- Results Container -->
+        <div id="ai-suggest-results" class="ai-suggest-results"></div>
+      </div>
+
+      <div class="section-divider reveal"></div>
+
       <div class="dest-search-bar reveal">
         <span class="search-icon">🔍</span>
         <input type="text" id="dest-search" placeholder="Search destinations...">
@@ -251,5 +296,6 @@
 
   <script src="../js/main.js"></script>
   <script src="../js/destinations.js"></script>
+  <script src="../js/suggest.js"></script>
 </body>
 </html>
