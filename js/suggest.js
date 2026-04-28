@@ -28,10 +28,8 @@ async function handleSuggestSubmit(e) {
     return;
   }
 
-  // Determine API URL (using relative for now since frontend and backend are served together)
-  // If we were hardcoding the Render URL: const API_URL = 'https://travel-planner-final.onrender.com/api/suggest-destinations';
-  // Let's use relative path which is safer for dev/prod if served together
-  const API_URL = '/api/suggest-destinations';
+  // Determine API URL (using centralized config if available)
+  const API_URL = (window.API_BASE_URL || '') + '/api/suggest-destinations';
 
   const requestData = {
     interest: interestInput.value,
