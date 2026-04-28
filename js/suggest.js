@@ -95,13 +95,50 @@ function renderSuggestions(suggestions) {
     card.className = 'ai-result-card';
     card.style.animationDelay = `${delay}s`;
     
+    // Set initial structure with loading image
     card.innerHTML = `
-      <h3>${dest.name || 'Unknown Destination'}</h3>
-      <div class="result-cost">💰 ${dest.cost || 'Varies'}</div>
-      <p class="result-desc">${dest.description || 'A great place to visit.'}</p>
-      <div class="result-reason">✨ ${dest.reason || 'Matches your preferences perfectly.'}</div>
+      <div class="result-img-container loading-img"></div>
+      <div class="ai-result-card-body">
+        <h3>${dest.name || 'Unknown Destination'}</h3>
+        <div class="result-cost">💰 ${dest.cost || 'Varies'}</div>
+        <p class="result-desc">${dest.description || 'A great place to visit.'}</p>
+        <div class="result-reason">✨ ${dest.reason || 'Matches your preferences perfectly.'}</div>
+      </div>
     `;
     
     container.appendChild(card);
+
+    // Fetch image asynchronously from Wikipedia API
+    const cleanName = (dest.name || '').split(/[\/,]/)[0].replace(/\s*\(.*\)\s*/, '').trim();
+    let imageUrl = '../images/hero-bg.png'; // Fallback image
+    
+    if (cleanName) {
+      fetch(`https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(cleanName)}&prop=pageimages&format=json&pithumbsize=600&origin=*`)
+        .then(res => res.json())
+        .then(data => {
+          const pages = data.query?.pages;
+          if (pages) {
+            const pageId = Object.keys(pages)[0];
+            if (pageId !== '-1' && pages[pageId].thumbnail?.source) {
+              imageUrl = pages[pageId].thumbnail.source;
+            }
+          }
+          updateCardImage(card, imageUrl, dest.name);
+        })
+        .catch(err => {
+          console.error('Failed to fetch image for', cleanName, err);
+          updateCardImage(card, imageUrl, dest.name);
+        });
+    } else {
+      updateCardImage(card, imageUrl, dest.name);
+    }
   });
+}
+
+function updateCardImage(card, url, altText) {
+  const imgContainer = card.querySelector('.result-img-container');
+  if (imgContainer) {
+    imgContainer.classList.remove('loading-img');
+    imgContainer.innerHTML = `<img src="${url}" alt="${altText}" class="result-img" loading="lazy">`;
+  }
 }
